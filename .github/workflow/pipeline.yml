@@ -1,0 +1,29 @@
+yaml
+name: DevOps_CI_Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Download Code
+        uses: actions/checkout@v4
+
+      - name: 2. Build Docker Image
+        run: docker build -t my-devops-site .
+
+      - name: 3. Start Container for Testing
+        run: docker run -d -p 8080:80 --name test-web my-devops-site
+
+      - name: 4. Verify Site is Working
+        run: |
+          sleep 5
+          curl --silent --fail http://localhost:8080 | grep "DevOps"
+          
+      - name: 5. Cleanup
+        run: docker stop test-web && docker rm test-web
